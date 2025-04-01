@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  mysql-redis-db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=ramsingh
+    ports:
+      - 3306:3306
+    restart: always
+    networks:
+      springboot-mysql-redis-net:
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+      interval: 3s
+
+  redis-cache-db:
+    image: redis
+    ports:
+      - 6379:6379
+    restart: always
+    networks:
+      springboot-mysql-redis-net:
+    healthcheck:
+      test: [ "CMD", "redis-cli" ,"ping" ]
+      timeout: 20s
+      retries: 10
+      interval: 3s
+
+  springboot-mysql-redis-webservices:
+    container_name: springboot-mysql-redis-webservices-app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      mysql-redis-db:
+        condition: service_healthy
+      redis-cache-db:
+        condition: service_healthy
+    networks:
+      springboot-mysql-redis-net:
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-redis-db:3306/users_mysql_redis?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      REDIS_HOSTNAME: redis-cache-db
+      REDIS_PORT: 6379
+
+networks:
+  springboot-mysql-redis-net:
