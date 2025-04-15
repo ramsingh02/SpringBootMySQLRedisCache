@@ -8,11 +8,6 @@
 
 name: Java CI with Maven
 
-env:
-  MYSQL_DATABASE: mysql_redis
-  MYSQL_PASSWORD: root
-  MYSQL_HOST: mysql
-
 on:
   push:
     branches: [ "master" ]

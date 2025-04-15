@@ -3,11 +3,13 @@ version: "3.8"
 services:
   mysql-redis-db:
     image: mysql
+    container_name: mysql-redis-db
+    env_file: ./.env
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_USER=ramsingh
+      - MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD"
+      - MYSQL_USER="$MYSQL_USER"
     ports:
-      - 3306:3306
+      - "3306:3306"
     restart: always
     networks:
       springboot-mysql-redis-net:
@@ -19,8 +21,10 @@ services:
 
   redis-cache-db:
     image: redis
+    container_name: redis-cache-db
+    env_file: ./.env
     ports:
-      - 6379:6379
+      - "6379:6379"
     restart: always
     networks:
       springboot-mysql-redis-net:
@@ -36,7 +40,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - "8080:8080"
     depends_on:
       mysql-redis-db:
         condition: service_healthy
@@ -45,12 +49,13 @@ services:
     networks:
       springboot-mysql-redis-net:
     restart: on-failure
+    env_file: ./.env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-redis-db:3306/users_mysql_redis?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-redis-db:3306/$MYSQL_DB_NAME?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: $MYSQL_ROOT_USERNAME
+      SPRING_DATASOURCE_PASSWORD: $MYSQL_ROOT_PASSWORD
       REDIS_HOSTNAME: redis-cache-db
-      REDIS_PORT: 6379
+      REDIS_PORT: $REDIS_PORT
 
 networks:
   springboot-mysql-redis-net:
