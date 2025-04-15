@@ -21,7 +21,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     services:
@@ -62,7 +61,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn clean install
+        #run: mvn clean install
+        run: cd SpringBootMySQLRedisCache && mvn -B package
 
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
