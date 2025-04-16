@@ -6,34 +6,67 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
 
 jobs:
-  build:
-    name: CI action
+  build-and-push:
     runs-on: ubuntu-latest
-    container:
-      image: lucasalt/act_base:latest
+
+    env:
+      IMAGE_NAME: ramsinghnagarro/springboot-mysql-redis-webservices
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Build docker-compose stack
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build project with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract short SHA for tag
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
         run: |
-          echo ---Building and starting up docker---
-          docker-compose -f docker-compose.yml up -d --build
-          echo ---Containers up---
+          docker build -t $IMAGE_NAME:${{ steps.vars.outputs.sha_short }} .
 
-      - name: Check running containers
-        run: docker ps
+      - name: Push image to Docker Hub
+        run: docker push $IMAGE_NAME:${{ steps.vars.outputs.sha_short }}
 
-      - name: Stop containers
-        if: always()
-        run: docker-compose -f docker-compose.yml down
+      - name: Update docker-compose.yml
+        run: |
+          sed -i 's|image: .*$|image: '"$IMAGE_NAME:${{ steps.vars.outputs.sha_short }}"'|' docker-compose.yml
 
+      - name: Commit updated docker-compose.yml
+        run: |
+          git config user.name "ramsingh02"
+          git config user.email "ram.singh01@nagarro.com"
+          git add docker-compose.yml
+          git commit -m "Update docker-compose image tag to ${{ steps.vars.outputs.sha_short }}"
+          git push
 
