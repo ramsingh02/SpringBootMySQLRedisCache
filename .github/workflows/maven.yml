@@ -69,4 +69,3 @@ jobs:
           git add docker-compose.yml
           git commit -m "Update docker-compose image tag to ${{ steps.vars.outputs.sha_short }}"
           git push
-
