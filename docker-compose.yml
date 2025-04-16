@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   mysql-redis-db:
-    image: ramsinghnagarro/springboot-mysql-redis-webservices:29e6377
+    image: ramsinghnagarro/springboot-mysql-redis-webservices:d776b21
     container_name: mysql-redis-db
     env_file: ./.env
     environment:
@@ -20,7 +20,7 @@ services:
       interval: 3s
 
   redis-cache-db:
-    image: ramsinghnagarro/springboot-mysql-redis-webservices:29e6377
+    image: ramsinghnagarro/springboot-mysql-redis-webservices:d776b21
     container_name: redis-cache-db
     env_file: ./.env
     ports:
