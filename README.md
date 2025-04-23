@@ -94,4 +94,4 @@ build-deploy: Builds the Docker image, tags it with the latest, and pushes it to
   Step 5: Configure Github Secrets
   To securely store your Docker Hub credentials, you'll need to create Github secrets. Go to your Github repository's settings and click on the "Secrets" tab. Create two secrets:
 
-  DOCKER_HUB_USERNAME: Your Docker Hub username DOCKER_HUB_ACCESS_TOKEN: Your Docker Hub access token
+  DOCKER_HUB_USERNAME: Your Docker Hub username DOCKER_HUB_ACCESS_TOKEN: Your Docker Hub access token 
